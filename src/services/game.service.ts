@@ -45,11 +45,21 @@ export async function joinGame(code: string, player: Player): Promise<Game> {
     if (current.state?.phase !== "waiting") return undefined // abort
     const players: Player[] = current.players ?? []
     if (players.find((p: Player) => p.id === player.id)) return current // already in
+    if (players.find((p: Player) => p.name.toLowerCase() === player.name.toLowerCase())) return undefined // name taken
     return { ...current, players: [...players, player] }
   })
 
   if (!committed || !snapshot.exists()) {
-    throw new Error(`Could not join game "${code}".`)
+    // Check if it failed due to duplicate name
+    const checkSnap = await get(gameRef)
+    if (checkSnap.exists()) {
+      const game = checkSnap.val() as Game
+      const players: Player[] = game.players ?? []
+      if (players.find((p) => p.name.toLowerCase() === player.name.toLowerCase())) {
+        throw new Error("Ce nom est déjà pris dans cette partie.")
+      }
+    }
+    throw new Error(`Impossible de rejoindre la partie "${code}".`)
   }
 
   return snapshot.val() as Game
@@ -170,6 +180,6 @@ export async function nextJudgingQuestion(code: string): Promise<void> {
   if (nextIndex < game.questions.length) {
     await startJudgingQuestion(code, nextIndex)
   } else {
-    await updateGameState(code, { phase: "results", judgingSubPhase: undefined, judgingAttempt: undefined })
+    await update(ref(database, `${gamePath(code)}/state`), { phase: "results", judgingSubPhase: null, judgingAttempt: null })
   }
 }

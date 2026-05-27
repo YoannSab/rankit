@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from "@mui/material"
 import { alpha } from "@mui/material/styles"
 
-const LINKS = ["Privacy", "Terms", "Contact"]
+const LINKS = ["Confidentialité", "Conditions", "Contact"]
 
 export function Footer() {
   return (
@@ -15,7 +15,7 @@ export function Footer() {
       }}
     >
       <Typography variant="body2" color="text.disabled" sx={{ mb: 1 }}>
-        © {new Date().getFullYear()} Rank It Conv&apos; — All rights reserved.
+        © {new Date().getFullYear()} Rank It Conv&apos; — Tous droits réservés.
       </Typography>
       <Stack direction="row" sx={{ gap: 3, justifyContent: "center" }}>
         {LINKS.map((link) => (

@@ -41,7 +41,7 @@ export function JoinGame() {
       setGameCode(code.toUpperCase())
       navigate(`/game/${code.toUpperCase()}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to join game.")
+      setError(err instanceof Error ? err.message : "Impossible de rejoindre la partie.")
       setLoading(false)
     }
   }
@@ -61,38 +61,38 @@ export function JoinGame() {
           onClick={() => navigate("/")}
           sx={{ mb: 3, color: "text.secondary", textTransform: "none" }}
         >
-          Back
+          Retour
         </Button>
 
         <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-          Join a Game
+          Rejoindre une partie
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Enter the 5-character code shared by the game host.
+          Entrez le code à 5 caractères partagé par l'hôte.
         </Typography>
 
         <TextField
           fullWidth
-          label="Game Code"
+          label="Code de partie"
           value={code}
           onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 5))}
-          inputProps={{ maxLength: 5, style: { letterSpacing: 4, fontWeight: 700 } }}
+          slotProps={{ htmlInput: { maxLength: 5, style: { letterSpacing: 4, fontWeight: 700 } } }}
           placeholder="ABC12"
           sx={{ mb: 2 }}
         />
 
         <TextField
           fullWidth
-          label="Your Name"
+          label="Votre nom"
           value={playerName}
           onChange={(e) => setPlayerName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleJoin()}
-          inputProps={{ maxLength: 30 }}
+          slotProps={{ htmlInput: { maxLength: 30 } }}
           sx={{ mb: 2 }}
         />
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Your role
+          Votre rôle
         </Typography>
         <Stack direction="row" sx={{ gap: 1, mb: 3 }}>
           {(["player", "judge"] as const).map((r) => (
@@ -100,9 +100,9 @@ export function JoinGame() {
               key={r}
               variant={role === r ? "contained" : "outlined"}
               onClick={() => setRole(r)}
-              sx={{ textTransform: "capitalize", flex: 1 }}
+              sx={{ textTransform: "none", flex: 1, fontWeight: 600 }}
             >
-              {r}
+              {r === "player" ? "Joueur" : "Juge"}
             </Button>
           ))}
         </Stack>
@@ -127,7 +127,7 @@ export function JoinGame() {
             background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${alpha(theme.palette.secondary.main, 0.73)} 100%)`,
           })}
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : `Join as ${role}`}
+          {loading ? <CircularProgress size={24} color="inherit" /> : `Rejoindre en tant que ${role === "player" ? "joueur" : "juge"}`}
         </Button>
       </Container>
     </Box>

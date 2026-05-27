@@ -5,7 +5,6 @@ import AddIcon from "@mui/icons-material/Add"
 import LoginIcon from "@mui/icons-material/Login"
 import { Footer } from "../components/Footer"
 import { Hero } from "../components/Hero"
-import { Navbar } from "../components/Navbar"
 
 export function LandingPage() {
   const navigate = useNavigate()
@@ -23,8 +22,6 @@ export function LandingPage() {
         ].join(", "),
       })}
     >
-      <Navbar />
-
       <Container
         maxWidth="sm"
         sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}
@@ -46,7 +43,7 @@ export function LandingPage() {
               background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0.73)} 100%)`,
             })}
           >
-            Create a Game
+            Créer une partie
           </Button>
           <Button
             variant="outlined"
@@ -67,7 +64,7 @@ export function LandingPage() {
               },
             })}
           >
-            Join a Game
+            Rejoindre une partie
           </Button>
         </Stack>
       </Container>

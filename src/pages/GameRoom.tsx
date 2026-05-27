@@ -63,18 +63,17 @@ export function GameRoom() {
           </Typography>
           <Chip label={`#${code}`} size="small" variant="outlined" sx={{ fontWeight: 600 }} />
           <Chip
-            label={phase}
+            label={phase === "waiting" ? "Attente" : phase === "voting" ? "Vote" : phase === "judging" ? "Jugement" : "Résultats"}
             size="small"
             color={phase === "waiting" ? "warning" : phase === "results" ? "success" : "primary"}
-            sx={{ textTransform: "capitalize" }}
           />
         </Stack>
         <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
           <Typography variant="body2" color="text.secondary">
-            {game.players.length} player{game.players.length !== 1 ? "s" : ""}
+            {game.players.length} joueur{game.players.length !== 1 ? "s" : ""}
           </Typography>
           {isMaster && (
-            <Chip label="Master" size="small" color="primary" />
+            <Chip label="Maître" size="small" color="primary" />
           )}
         </Stack>
       </Box>

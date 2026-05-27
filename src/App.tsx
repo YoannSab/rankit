@@ -1,6 +1,7 @@
 import { CssBaseline, ThemeProvider } from "@mui/material"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { RankItProvider } from "./context/RankItContext"
+import { Navbar } from "./components/Navbar"
 import { CreateGame } from "./pages/CreateGame"
 import { GameRoom } from "./pages/GameRoom"
 import { JoinGame } from "./pages/JoinGame"
@@ -13,6 +14,7 @@ export default function App() {
       <CssBaseline />
       <BrowserRouter>
         <RankItProvider>
+          <Navbar />
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/create" element={<CreateGame />} />

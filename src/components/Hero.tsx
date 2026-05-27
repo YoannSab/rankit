@@ -31,7 +31,7 @@ export function Hero() {
         color="text.secondary"
         sx={{ maxWidth: 540, mx: "auto", lineHeight: 1.75, fontWeight: 400 }}
       >
-        Rank your friends, guess each other&apos;s choices. Who really knows the group?
+        Classez vos amis, devinez les choix des autres. Qui connaît vraiment le groupe ?
       </Typography>
     </Box>
   )

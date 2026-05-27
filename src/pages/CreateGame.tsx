@@ -68,7 +68,7 @@ export function CreateGame() {
       setGameCode(code)
       navigate(`/game/${code}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create game.")
+      setError(err instanceof Error ? err.message : "Impossible de créer la partie.")
       setLoading(false)
     }
   }
@@ -88,14 +88,14 @@ export function CreateGame() {
           onClick={() => navigate("/")}
           sx={{ mb: 3, color: "text.secondary", textTransform: "none" }}
         >
-          Back
+          Retour
         </Button>
 
         <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-          Create a Game
+          Créer une partie
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Set up your game and share the code with friends.
+          Configurez votre partie et partagez le code avec vos amis.
         </Typography>
 
         {/* Game code */}
@@ -113,7 +113,7 @@ export function CreateGame() {
         >
           <Box>
             <Typography variant="caption" color="text.secondary">
-              Game Code
+              Code de partie
             </Typography>
             <Typography
               variant="h3"
@@ -128,32 +128,32 @@ export function CreateGame() {
             onClick={handleCopy}
             sx={{ textTransform: "none", borderColor: "primary.main", color: "primary.main" }}
           >
-            {copied ? "Copied!" : "Copy"}
+            {copied ? "Copié !" : "Copier"}
           </Button>
         </Box>
 
         <TextField
           fullWidth
-          label="Game Name"
-          placeholder="e.g. Soirée du samedi"
+          label="Nom de la partie"
+          placeholder="Ex: Soirée du samedi"
           value={gameName}
           onChange={(e) => setGameName(e.target.value)}
-          inputProps={{ maxLength: 50 }}
+          slotProps={{ htmlInput: { maxLength: 50 } }}
           sx={{ mb: 2 }}
         />
 
         <TextField
           fullWidth
-          label="Your Name"
+          label="Votre nom"
           value={playerName}
           onChange={(e) => setPlayerName(e.target.value)}
-          inputProps={{ maxLength: 30 }}
+          slotProps={{ htmlInput: { maxLength: 30 } }}
           sx={{ mb: 2 }}
         />
 
         {/* Role selection */}
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Your role
+          Votre rôle
         </Typography>
         <Stack direction="row" sx={{ gap: 1, mb: 3 }}>
           {(["player", "judge"] as const).map((r) => (
@@ -161,16 +161,14 @@ export function CreateGame() {
               key={r}
               variant={role === r ? "contained" : "outlined"}
               onClick={() => setRole(r)}
-              sx={{ textTransform: "capitalize", flex: 1 }}
+              sx={{ textTransform: "none", flex: 1, fontWeight: 600 }}
             >
-              {r}
+              {r === "player" ? "Joueur" : "Juge"}
             </Button>
           ))}
         </Stack>
-
-        {/* Questions */}
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Questions (players will rank each other on these)
+          Questions (les joueurs se classeront sur ces critères)
         </Typography>
         <Stack sx={{ gap: 1.5, mb: 3 }}>
           {questions.map((q, i) => (
@@ -181,7 +179,7 @@ export function CreateGame() {
                 placeholder={`e.g. "Le plus courageux"`}
                 value={q}
                 onChange={(e) => handleQuestionChange(i, e.target.value)}
-                inputProps={{ maxLength: 100 }}
+                slotProps={{ htmlInput: { maxLength: 100 } }}
               />
               {questions.length > 1 && (
                 <IconButton size="small" onClick={() => handleRemoveQuestion(i)}>
@@ -195,7 +193,7 @@ export function CreateGame() {
             onClick={handleAddQuestion}
             sx={{ alignSelf: "flex-start", textTransform: "none" }}
           >
-            Add question
+            Ajouter une question
           </Button>
         </Stack>
 
@@ -219,7 +217,7 @@ export function CreateGame() {
             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0.73)} 100%)`,
           })}
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : "Create Game"}
+          {loading ? <CircularProgress size={24} color="inherit" /> : "Créer la partie"}
         </Button>
       </Container>
     </Box>

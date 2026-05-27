@@ -20,10 +20,10 @@ export function WaitingPhase() {
   return (
     <Box>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-        Waiting for players…
+        En attente des joueurs…
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Share code <strong>{gameCode}</strong> with your friends. The master starts the game when everyone is ready.
+        Partagez le code <strong>{gameCode}</strong> avec vos amis. Le maître lance la partie quand tout le monde est prêt.
       </Typography>
 
       <Stack direction={{ xs: "column", sm: "row" }} sx={{ gap: 3, mb: 4 }}>
@@ -40,14 +40,14 @@ export function WaitingPhase() {
           <Stack direction="row" sx={{ alignItems: "center", gap: 1, mb: 1 }}>
             <PersonIcon sx={{ fontSize: 18, color: "secondary.main" }} />
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Players ({players.length})
+              Joueurs ({players.length})
             </Typography>
           </Stack>
           <List dense disablePadding>
             {players.map((p) => (
               <ListItem key={p.id} disablePadding>
                 <ListItemText primary={p.name} />
-                {p.id === game.masterId && <Chip label="Master" size="small" color="primary" />}
+                {p.id === game.masterId && <Chip label="Maître" size="small" color="primary" />}
               </ListItem>
             ))}
           </List>
@@ -66,14 +66,14 @@ export function WaitingPhase() {
           <Stack direction="row" sx={{ alignItems: "center", gap: 1, mb: 1 }}>
             <GavelIcon sx={{ fontSize: 18, color: "primary.main" }} />
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Judges ({judges.length})
+              Juges ({judges.length})
             </Typography>
           </Stack>
           <List dense disablePadding>
             {judges.map((p) => (
               <ListItem key={p.id} disablePadding>
                 <ListItemText primary={p.name} />
-                {p.id === game.masterId && <Chip label="Master" size="small" color="primary" />}
+                {p.id === game.masterId && <Chip label="Maître" size="small" color="primary" />}
               </ListItem>
             ))}
           </List>
@@ -101,12 +101,12 @@ export function WaitingPhase() {
           disabled={players.length < 2}
           sx={{ textTransform: "none", fontWeight: 600 }}
         >
-          Start Game
+          Lancer la partie
         </Button>
       )}
       {!isMaster && (
         <Typography variant="body2" color="text.disabled">
-          Waiting for the master to start…
+          En attente du lancement par le maître…
         </Typography>
       )}
     </Box>
