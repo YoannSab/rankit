@@ -6,6 +6,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import CancelIcon from "@mui/icons-material/Cancel"
 import StarIcon from "@mui/icons-material/Star"
 import { useRankIt } from "../../hooks/useRankIt"
+import { PlayerAvatar } from "../PlayerAvatar"
 
 // ── Podium colors ─────────────────────────────────────────────────────────────
 
@@ -65,32 +66,32 @@ export function ResultsPhase() {
         <Box
           sx={(theme) => ({
             textAlign: "center",
-            py: 5,
-            px: 3,
-            mb: 4,
+            py: 2.5,
+            px: 2.5,
+            mb: 3,
             borderRadius: 3,
             background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.12)}, ${alpha(theme.palette.secondary.main, 0.08)})`,
             border: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
           })}
         >
-          <EmojiEventsIcon sx={{ fontSize: 56, color: "warning.main", mb: 1 }} />
-          <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5 }}>
+          <EmojiEventsIcon sx={{ fontSize: 36, color: "warning.main", mb: 0.5 }} />
+          <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.25 }}>
             {tier.emoji} {tier.label}
           </Typography>
-          <Typography variant="h2" sx={{ fontWeight: 900, color: "primary.main", mb: 1 }}>
+          <Typography variant="h3" sx={{ fontWeight: 900, color: "primary.main", mb: 0.5 }}>
             {accuracy}%
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body2" color="text.secondary">
             {correctPlacements} placement{correctPlacements !== 1 ? "s" : ""} correct{correctPlacements !== 1 ? "s" : ""} sur {totalPlacements}
           </Typography>
           <LinearProgress
             variant="determinate"
             value={accuracy}
             sx={(theme) => ({
-              mt: 2,
+              mt: 1.5,
               mx: "auto",
-              maxWidth: 300,
-              height: 10,
+              maxWidth: 260,
+              height: 8,
               borderRadius: 5,
               backgroundColor: alpha(theme.palette.common.white, 0.08),
               "& .MuiLinearProgress-bar": {
@@ -150,101 +151,106 @@ export function ResultsPhase() {
               <Divider sx={{ mb: 1.5, opacity: 0.2 }} />
 
               {/* Side-by-side rankings */}
-              <Stack sx={{ gap: 0.75 }}>
-                {truthSorted.map((d, i) => {
-                  const judgeEntry = judgeSorted[i]
-                  const isCorrect = d.player.id === judgeEntry?.player.id
-
-                  return (
-                    <Stack
-                      key={i}
-                      direction="row"
-                      sx={{ gap: 2, alignItems: "center" }}
-                    >
-                      {/* Left: True ranking */}
-                      <Box
-                        sx={(theme) => ({
-                          flex: 1,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1.5,
-                          px: 1.5,
-                          py: 1,
-                          borderRadius: 2,
-                          background: alpha(theme.palette.success.main, 0.06),
-                          border: `1px solid ${alpha(theme.palette.success.main, 0.15)}`,
-                        })}
-                      >
-                        {/* Position badge */}
+              <Stack direction="row" sx={{ gap: { xs: 1, sm: 2 }, alignItems: "flex-start" }}>
+                {/* Left: true ranking */}
+                <Stack sx={{ flex: 1, gap: 1.5 }}>
+                  {truthSorted.map((d, i) => (
+                    <Stack key={d.player.id} sx={{ alignItems: "center", gap: 0.75 }}>
+                      <Box sx={{ position: "relative" }}>
+                        <PlayerAvatar player={d.player} size={64} animate={false} ringColor="secondary" />
                         <Box
                           sx={{
-                            width: 28,
-                            height: 28,
+                            position: "absolute",
+                            bottom: -3,
+                            left: -3,
+                            width: 24,
+                            height: 24,
                             borderRadius: "50%",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             fontWeight: 900,
-                            fontSize: "0.8rem",
-                            color: i < 3 ? "#000" : "text.secondary",
-                            background: i < 3 ? podiumColors[i] : "rgba(255,255,255,0.06)",
-                            boxShadow: i < 3 ? `0 2px 8px ${alpha(podiumColors[i], 0.4)}` : "none",
+                            fontSize: "0.75rem",
+                            color: i < 3 ? "#000" : "#fff",
+                            background: i < 3 ? podiumColors[i] : "rgba(40,46,60,1)",
+                            border: "2px solid",
+                            borderColor: "background.paper",
+                            boxShadow: i < 3 ? `0 2px 8px ${alpha(podiumColors[i], 0.5)}` : "none",
                           }}
                         >
                           {i + 1}
                         </Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {d.player.name}
-                        </Typography>
                       </Box>
+                      <Typography variant="caption" sx={{ fontWeight: 700, maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {d.player.name}
+                      </Typography>
+                    </Stack>
+                  ))}
+                </Stack>
 
-                      {/* Right: Judge ranking */}
-                      <Box
-                        sx={(theme) => ({
-                          flex: 1,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1.5,
-                          px: 1.5,
-                          py: 1,
-                          borderRadius: 2,
-                          background: isCorrect
-                            ? alpha(theme.palette.success.main, 0.08)
-                            : alpha(theme.palette.error.main, 0.05),
-                          border: `1px solid ${isCorrect
-                            ? alpha(theme.palette.success.main, 0.25)
-                            : alpha(theme.palette.error.main, 0.2)
-                          }`,
-                        })}
-                      >
-                        <Box
-                          sx={(theme) => ({
-                            width: 28,
-                            height: 28,
-                            borderRadius: "50%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontWeight: 900,
-                            fontSize: "0.8rem",
-                            color: isCorrect ? theme.palette.success.contrastText : theme.palette.error.contrastText,
-                            background: isCorrect ? theme.palette.success.main : theme.palette.error.main,
-                          })}
-                        >
-                          {i + 1}
+                {/* Right: judge ranking */}
+                <Stack sx={{ flex: 1, gap: 1.5 }}>
+                  {judgeSorted.map((judgeEntry, i) => {
+                    const isCorrect = truthSorted[i]?.player.id === judgeEntry?.player.id
+                    return (
+                      <Stack key={judgeEntry?.player.id ?? i} sx={{ alignItems: "center", gap: 0.75 }}>
+                        <Box sx={{ position: "relative" }}>
+                          {judgeEntry?.player ? (
+                            <PlayerAvatar
+                              player={judgeEntry.player}
+                              size={64}
+                              animate={false}
+                              ringColor={isCorrect ? "secondary" : "primary"}
+                            />
+                          ) : (
+                            <Box sx={{ width: 68, height: 68 }} />
+                          )}
+                          {/* Rank badge */}
+                          <Box
+                            sx={(theme) => ({
+                              position: "absolute",
+                              bottom: -3,
+                              left: -3,
+                              width: 24,
+                              height: 24,
+                              borderRadius: "50%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontWeight: 900,
+                              fontSize: "0.75rem",
+                              color: "#fff",
+                              background: isCorrect ? theme.palette.success.main : theme.palette.error.main,
+                              border: `2px solid ${theme.palette.background.paper}`,
+                            })}
+                          >
+                            {i + 1}
+                          </Box>
+                          {/* Correctness badge */}
+                          <Box
+                            sx={(theme) => ({
+                              position: "absolute",
+                              top: -4,
+                              right: -4,
+                              borderRadius: "50%",
+                              background: theme.palette.background.paper,
+                              display: "flex",
+                            })}
+                          >
+                            {isCorrect ? (
+                              <CheckCircleIcon sx={{ color: "success.main", fontSize: 20 }} />
+                            ) : (
+                              <CancelIcon sx={{ color: "error.main", fontSize: 20 }} />
+                            )}
+                          </Box>
                         </Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {judgeEntry?.player.name ?? "—"}
                         </Typography>
-                        {isCorrect ? (
-                          <CheckCircleIcon sx={{ color: "success.main", fontSize: 18 }} />
-                        ) : (
-                          <CancelIcon sx={{ color: "error.main", fontSize: 18 }} />
-                        )}
-                      </Box>
-                    </Stack>
-                  )
-                })}
+                      </Stack>
+                    )
+                  })}
+                </Stack>
               </Stack>
             </Box>
           </motion.div>

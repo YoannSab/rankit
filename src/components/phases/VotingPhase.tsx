@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react"
 import { Box, Button, Chip, Typography } from "@mui/material"
 import { alpha } from "@mui/material/styles"
-import { motion, Reorder, AnimatePresence } from "framer-motion"
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator"
+import { motion } from "framer-motion"
 import { useRankIt } from "../../hooks/useRankIt"
 import { submitVote, setGroundTruth, advanceQuestion, updateGameState } from "../../services/game.service"
+import { ReorderAvatarGrid } from "../ReorderAvatarGrid"
+import { AvatarRankTile } from "../AvatarRankTile"
+import { useAvatarViewer } from "../AvatarViewer"
 import type { Player, Ranking } from "../../types/types"
 
 export function VotingPhase() {
   const { game, gameCode, player, isMaster } = useRankIt()
+  const { open: openAvatar } = useAvatarViewer()
 
   const currentQuestionIndex = game?.state.currentQuestionIndex ?? 0
   const allPlayers = game?.players.filter((p) => p.role === "player") ?? []
@@ -141,64 +144,21 @@ export function VotingPhase() {
 
       {!submitted ? (
         <>
-          <Reorder.Group
-            axis="y"
-            values={ranking}
+          <ReorderAvatarGrid
+            items={ranking}
             onReorder={setRanking}
-            style={{ listStyle: "none", padding: 0, margin: 0 }}
-          >
-            <AnimatePresence>
-              {ranking.map((p, i) => (
-                <Reorder.Item
-                  key={p.id}
-                  value={p}
-                  style={{ marginBottom: 8 }}
-                  whileDrag={{
-                    scale: 1.03,
-                    boxShadow: "0 8px 32px rgba(124,58,237,0.25)",
-                    cursor: "grabbing",
-                  }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                >
-                  <Box
-                    sx={(theme) => ({
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 2,
-                      px: 2.5,
-                      py: 2,
-                      borderRadius: 2,
-                      cursor: "grab",
-                      userSelect: "none",
-                      background: alpha(theme.palette.common.white, 0.03),
-                      border: `1px solid ${alpha(theme.palette.common.white, 0.08)}`,
-                      transition: "border-color 0.2s, background 0.2s",
-                      "&:hover": {
-                        borderColor: alpha(theme.palette.primary.main, 0.4),
-                        background: alpha(theme.palette.primary.main, 0.04),
-                      },
-                    })}
-                  >
-                    <DragIndicatorIcon sx={{ color: "text.disabled", fontSize: 22 }} />
-                    <Typography
-                      variant="h6"
-                      sx={{ fontWeight: 800, color: "primary.main", minWidth: 32, textAlign: "center" }}
-                    >
-                      {i + 1}
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
-                      {p.name}
-                      {p.id === player.id && (
-                        <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                          (vous)
-                        </Typography>
-                      )}
-                    </Typography>
-                  </Box>
-                </Reorder.Item>
-              ))}
-            </AnimatePresence>
-          </Reorder.Group>
+            draggable
+            onTileTap={(p) => openAvatar(p)}
+            renderTile={(p, i) => (
+              <AvatarRankTile
+                player={p}
+                rank={i + 1}
+                highlight={p.id === player.id}
+                caption={p.id === player.id ? "vous" : undefined}
+                disableViewer
+              />
+            )}
+          />
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
             <Button

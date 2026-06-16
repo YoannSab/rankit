@@ -14,6 +14,7 @@ import { alpha } from "@mui/material/styles"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import { useRankIt } from "../hooks/useRankIt"
 import { joinGame } from "../services/game.service"
+import { AvatarPicker } from "../components/AvatarPicker"
 import type { Player, Role } from "../types/types"
 
 export function JoinGame() {
@@ -23,6 +24,7 @@ export function JoinGame() {
   const [code, setCode] = useState("")
   const [playerName, setPlayerName] = useState("")
   const [role, setRole] = useState<Role>("player")
+  const [avatar, setAvatar] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -36,6 +38,7 @@ export function JoinGame() {
     try {
       const playerId = crypto.randomUUID()
       const player: Player = { id: playerId, name: playerName.trim(), role }
+      if (avatar) player.avatar = avatar
       await joinGame(code.toUpperCase(), player)
       setPlayer(player)
       setGameCode(code.toUpperCase())
@@ -88,8 +91,10 @@ export function JoinGame() {
           onChange={(e) => setPlayerName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleJoin()}
           slotProps={{ htmlInput: { maxLength: 30 } }}
-          sx={{ mb: 2 }}
+          sx={{ mb: 3 }}
         />
+
+        <AvatarPicker value={avatar} name={playerName || "?"} onChange={setAvatar} />
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           Votre rôle

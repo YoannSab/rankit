@@ -1,10 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { Box, Button, Chip, Stack, Typography, LinearProgress } from "@mui/material"
 import { alpha, keyframes } from "@mui/material/styles"
-import { motion, Reorder, AnimatePresence } from "framer-motion"
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator"
-import CheckCircleIcon from "@mui/icons-material/CheckCircle"
-import CancelIcon from "@mui/icons-material/Cancel"
+import { motion, AnimatePresence } from "framer-motion"
 import ReplayIcon from "@mui/icons-material/Replay"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import LockIcon from "@mui/icons-material/Lock"
@@ -16,14 +13,12 @@ import {
   nextJudgingQuestion,
 } from "../../services/game.service"
 import { useRealtimeValue } from "../../hooks/useRealtimeValue"
+import { ReorderAvatarGrid } from "../ReorderAvatarGrid"
+import { AvatarRankTile } from "../AvatarRankTile"
+import { useAvatarViewer } from "../AvatarViewer"
 import type { Player, Ranking } from "../../types/types"
 
 // ── Keyframe animations ───────────────────────────────────────────────────────
-
-const shimmer = keyframes`
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-`
 
 const pulseGlow = keyframes`
   0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
@@ -34,6 +29,7 @@ const pulseGlow = keyframes`
 
 export function JudgingPhase() {
   const { game, gameCode, player, isMaster } = useRankIt()
+  const { open: openAvatar } = useAvatarViewer()
 
   const currentQuestionIndex = game?.state.currentQuestionIndex ?? 0
   const subPhase = game?.state.judgingSubPhase ?? "ranking"
@@ -230,8 +226,16 @@ export function JudgingPhase() {
           )}
         </AnimatePresence>
 
-        {/* Ranking list with reveal */}
-        <Stack sx={{ gap: 1.5, mb: 4 }}>
+        {/* Ranking grid with reveal */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))",
+            gap: 1.5,
+            justifyItems: "center",
+            mb: 4,
+          }}
+        >
           {localOrder.map((p, i) => {
             const revealed = revealedItems.has(i)
             const correct = getCorrectness(p.id, i)
@@ -239,94 +243,21 @@ export function JudgingPhase() {
             return (
               <motion.div
                 key={p.id}
-                initial={{ opacity: 0.3, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.5 + 0.3, type: "spring", stiffness: 200 }}
+                initial={{ opacity: 0.3, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.5 + 0.3, type: "spring", stiffness: 220, damping: 18 }}
+                style={{ width: "100%", display: "flex", justifyContent: "center" }}
               >
-                <Box
-                  sx={(theme) => ({
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 2,
-                    px: 2.5,
-                    py: 2,
-                    borderRadius: 2.5,
-                    transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-                    ...(revealed
-                      ? {
-                          background: correct
-                            ? alpha(theme.palette.success.main, 0.1)
-                            : alpha(theme.palette.error.main, 0.08),
-                          border: `2px solid ${correct
-                            ? alpha(theme.palette.success.main, 0.6)
-                            : alpha(theme.palette.error.main, 0.5)
-                          }`,
-                          boxShadow: correct
-                            ? `0 0 20px ${alpha(theme.palette.success.main, 0.15)}`
-                            : `0 0 20px ${alpha(theme.palette.error.main, 0.1)}`,
-                        }
-                      : {
-                          background: alpha(theme.palette.common.white, 0.02),
-                          border: `2px solid ${alpha(theme.palette.common.white, 0.06)}`,
-                          backgroundImage: `linear-gradient(90deg, transparent 30%, ${alpha(theme.palette.primary.main, 0.06)} 50%, transparent 70%)`,
-                          backgroundSize: "200% 100%",
-                          animation: `${shimmer} 1.5s ease-in-out infinite`,
-                        }),
-                  })}
-                >
-                  {/* Position badge */}
-                  <Box
-                    sx={(theme) => ({
-                      width: 36,
-                      height: 36,
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: 900,
-                      fontSize: "1rem",
-                      color: revealed
-                        ? correct ? theme.palette.success.contrastText : theme.palette.error.contrastText
-                        : theme.palette.text.secondary,
-                      background: revealed
-                        ? correct
-                          ? theme.palette.success.main
-                          : theme.palette.error.main
-                        : alpha(theme.palette.common.white, 0.08),
-                      transition: "all 0.4s ease",
-                    })}
-                  >
-                    {i + 1}
-                  </Box>
-
-                  {/* Player name */}
-                  <Typography variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
-                    {p.name}
-                  </Typography>
-
-
-
-                  {/* Status icon */}
-                  <AnimatePresence>
-                    {revealed && (
-                      <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                      >
-                        {correct ? (
-                          <CheckCircleIcon sx={{ color: "success.main", fontSize: 28 }} />
-                        ) : (
-                          <CancelIcon sx={{ color: "error.main", fontSize: 28 }} />
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </Box>
+                <AvatarRankTile
+                  player={p}
+                  rank={i + 1}
+                  pending={!revealed}
+                  status={revealed ? (correct ? "correct" : "wrong") : undefined}
+                />
               </motion.div>
             )
           })}
-        </Stack>
+        </Box>
 
         {/* Master-only actions after full reveal */}
         {allRevealed && isMaster && (
@@ -421,45 +352,48 @@ export function JudgingPhase() {
         </Box>
       </motion.div>
 
-      {/* Drag & drop list — judges can reorder, others watch */}
+      {/* Drag grid — judges can reorder, others watch */}
       {isJudge ? (
-        <Reorder.Group
-          axis="y"
-          values={localOrder}
+        <ReorderAvatarGrid
+          items={localOrder}
           onReorder={handleReorder}
-          style={{ listStyle: "none", padding: 0, margin: 0 }}
-        >
-          <AnimatePresence>
-            {localOrder.map((p, i) => (
-              <Reorder.Item
-                key={p.id}
-                value={p}
-                style={{ marginBottom: 8 }}
-                whileDrag={{
-                  scale: 1.03,
-                  boxShadow: "0 8px 32px rgba(124,58,237,0.25)",
-                  cursor: "grabbing",
-                }}
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              >
-                <RankingCard player={p} position={i} attempt={attempt} game={game} currentQuestion={currentQuestion} draggable />
-              </Reorder.Item>
-            ))}
-          </AnimatePresence>
-        </Reorder.Group>
+          draggable
+          onTileTap={(p) => openAvatar(p)}
+          renderTile={(p, i) => (
+            <AvatarRankTile
+              player={p}
+              rank={i + 1}
+              disableViewer
+              subtitle={
+                attempt > 1 && game.judgeRankings?.[currentQuestion.id]
+                  ? `Avant #${game.judgeRankings[currentQuestion.id][p.id] ?? "?"}`
+                  : undefined
+              }
+            />
+          )}
+        />
       ) : (
-        <Stack sx={{ gap: 1 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))",
+            gap: 1.5,
+            justifyItems: "center",
+          }}
+        >
           {localOrder.map((p, i) => (
             <motion.div
               key={p.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
+              layout
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.05, type: "spring", stiffness: 400, damping: 28 }}
+              style={{ width: "100%", display: "flex", justifyContent: "center" }}
             >
-              <RankingCard player={p} position={i} attempt={attempt} game={game} currentQuestion={currentQuestion} />
+              <AvatarRankTile player={p} rank={i + 1} />
             </motion.div>
           ))}
-        </Stack>
+        </Box>
       )}
 
       {/* Lock & Reveal button — MASTER ONLY */}
@@ -493,67 +427,6 @@ export function JudgingPhase() {
             Valider & Révéler
           </Button>
         </motion.div>
-      )}
-    </Box>
-  )
-}
-
-// ── Ranking Card sub-component ────────────────────────────────────────────────
-
-function RankingCard({
-  player,
-  position,
-  attempt,
-  game,
-  currentQuestion,
-  draggable = false,
-}: {
-  player: Player
-  position: number
-  attempt: number
-  game: { judgeRankings: Record<string, Ranking> | null }
-  currentQuestion: { id: string }
-  draggable?: boolean
-}) {
-  return (
-    <Box
-      sx={(theme) => ({
-        display: "flex",
-        alignItems: "center",
-        gap: 2,
-        px: 2.5,
-        py: 2,
-        borderRadius: 2,
-        cursor: draggable ? "grab" : "default",
-        userSelect: "none",
-        background: alpha(theme.palette.common.white, 0.03),
-        border: `1px solid ${alpha(theme.palette.common.white, 0.08)}`,
-        transition: "border-color 0.2s, background 0.2s",
-        ...(draggable && {
-          "&:hover": {
-            borderColor: alpha(theme.palette.primary.main, 0.4),
-            background: alpha(theme.palette.primary.main, 0.04),
-          },
-        }),
-      })}
-    >
-      {draggable && <DragIndicatorIcon sx={{ color: "text.disabled", fontSize: 22 }} />}
-      <Typography
-        variant="h6"
-        sx={{ fontWeight: 800, color: "primary.main", minWidth: 32, textAlign: "center" }}
-      >
-        {position + 1}
-      </Typography>
-      <Typography variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
-        {player.name}
-      </Typography>
-      {attempt > 1 && game.judgeRankings?.[currentQuestion.id] && (
-        <Chip
-          label={`Avant: #${game.judgeRankings[currentQuestion.id][player.id] ?? "?"}`}
-          size="small"
-          variant="outlined"
-          sx={{ opacity: 0.6 }}
-        />
       )}
     </Box>
   )

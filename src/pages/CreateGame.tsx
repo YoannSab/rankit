@@ -19,6 +19,7 @@ import DeleteIcon from "@mui/icons-material/Delete"
 import { useRankIt } from "../hooks/useRankIt"
 import { createGame } from "../services/game.service"
 import { generateGameCode } from "../utils/gameCode"
+import { AvatarPicker } from "../components/AvatarPicker"
 import type { Player, Question } from "../types/types"
 
 export function CreateGame() {
@@ -29,7 +30,8 @@ export function CreateGame() {
   const [gameName, setGameName] = useState("")
   const [playerName, setPlayerName] = useState("")
   const [role, setRole] = useState<"player" | "judge">("player")
-  const [questions, setQuestions] = useState<string[]>(["Question 1", "Question 2", "Question 3"])
+  const [avatar, setAvatar] = useState<string | undefined>(undefined)
+  const [questions, setQuestions] = useState<string[]>([""])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -59,6 +61,7 @@ export function CreateGame() {
     try {
       const playerId = crypto.randomUUID()
       const master: Player = { id: playerId, name: playerName.trim(), role }
+      if (avatar) master.avatar = avatar
       const validQuestions: Question[] = questions
         .filter((q) => q.trim().length > 0)
         .map((q) => ({ id: crypto.randomUUID(), text: q.trim() }))
@@ -104,29 +107,31 @@ export function CreateGame() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            p: 2.5,
+            gap: 1.5,
+            p: 1.5,
             mb: 3,
             borderRadius: 2,
             background: alpha(theme.palette.primary.main, 0.08),
             border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
           })}
         >
-          <Box>
+          <Box sx={{ minWidth: 0 }}>
             <Typography variant="caption" color="text.secondary">
               Code de partie
             </Typography>
             <Typography
-              variant="h3"
-              sx={{ fontWeight: 800, letterSpacing: 6, color: "primary.main", lineHeight: 1.2 }}
+              variant="h5"
+              sx={{ fontWeight: 800, letterSpacing: 4, color: "primary.main", lineHeight: 1.2 }}
             >
               {code}
             </Typography>
           </Box>
           <Button
             variant="outlined"
+            size="small"
             startIcon={<ContentCopyIcon />}
             onClick={handleCopy}
-            sx={{ textTransform: "none", borderColor: "primary.main", color: "primary.main" }}
+            sx={{ textTransform: "none", borderColor: "primary.main", color: "primary.main", flexShrink: 0 }}
           >
             {copied ? "Copié !" : "Copier"}
           </Button>
@@ -150,6 +155,8 @@ export function CreateGame() {
           slotProps={{ htmlInput: { maxLength: 30 } }}
           sx={{ mb: 2 }}
         />
+
+        <AvatarPicker value={avatar} name={playerName || "?"} onChange={setAvatar} />
 
         {/* Role selection */}
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>

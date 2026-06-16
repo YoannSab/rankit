@@ -6,6 +6,8 @@ export interface Player {
     id: string
     name: string
     role: Role
+    /** Optional avatar as a compressed base64 data URL (taken from camera or gallery) */
+    avatar?: string
 }
 
 export interface Question {
