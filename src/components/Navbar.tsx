@@ -1,4 +1,4 @@
-import { AppBar, Box, Chip, Stack, Toolbar, Typography } from "@mui/material"
+import { AppBar, Chip, Stack, Toolbar, Typography } from "@mui/material"
 import { alpha } from "@mui/material/styles"
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents"
 import WifiOffIcon from "@mui/icons-material/WifiOff"
