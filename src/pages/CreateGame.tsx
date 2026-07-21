@@ -16,10 +16,13 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import AddIcon from "@mui/icons-material/Add"
 import DeleteIcon from "@mui/icons-material/Delete"
+import BookmarkAddOutlinedIcon from "@mui/icons-material/BookmarkAddOutlined"
 import { useRankIt } from "../hooks/useRankIt"
 import { createGame } from "../services/game.service"
 import { generateGameCode } from "../utils/gameCode"
 import { AvatarPicker } from "../components/AvatarPicker"
+import { QuestionPicker } from "../components/QuestionPicker"
+import { SaveToBankDialog } from "../components/SaveToBankDialog"
 import type { Player, Question } from "../types/types"
 
 export function CreateGame() {
@@ -35,6 +38,7 @@ export function CreateGame() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [saveToBankText, setSaveToBankText] = useState<string | null>(null)
 
   const canSubmit =
     gameName.trim().length > 0 &&
@@ -47,6 +51,24 @@ export function CreateGame() {
     setQuestions(questions.filter((_, idx) => idx !== i))
   const handleQuestionChange = (i: number, text: string) =>
     setQuestions(questions.map((q, idx) => (idx === i ? text : q)))
+
+  /** Question texts currently present, used to reflect suggestion checkboxes. */
+  const selectedSuggestions = new Set(
+    questions.map((q) => q.trim()).filter((q) => q.length > 0),
+  )
+
+  const handleToggleSuggestion = (text: string) =>
+    setQuestions((prev) => {
+      if (prev.some((q) => q.trim() === text)) {
+        const filtered = prev.filter((q) => q.trim() !== text)
+        return filtered.length > 0 ? filtered : [""]
+      }
+      const emptyIdx = prev.findIndex((q) => q.trim() === "")
+      if (emptyIdx !== -1) {
+        return prev.map((q, idx) => (idx === emptyIdx ? text : q))
+      }
+      return [...prev, text]
+    })
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code)
@@ -177,6 +199,12 @@ export function CreateGame() {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           Questions (les joueurs se classeront sur ces critères)
         </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+          Piochez parmi les suggestions ci-dessous ou écrivez les vôtres.
+        </Typography>
+
+        <QuestionPicker selected={selectedSuggestions} onToggle={handleToggleSuggestion} />
+
         <Stack sx={{ gap: 1.5, mb: 3 }}>
           {questions.map((q, i) => (
             <Stack key={i} direction="row" sx={{ gap: 1, alignItems: "center" }}>
@@ -188,6 +216,14 @@ export function CreateGame() {
                 onChange={(e) => handleQuestionChange(i, e.target.value)}
                 slotProps={{ htmlInput: { maxLength: 100 } }}
               />
+              <IconButton
+                size="small"
+                disabled={q.trim().length === 0}
+                onClick={() => setSaveToBankText(q.trim())}
+                title="Enregistrer dans la banque"
+              >
+                <BookmarkAddOutlinedIcon fontSize="small" />
+              </IconButton>
               {questions.length > 1 && (
                 <IconButton size="small" onClick={() => handleRemoveQuestion(i)}>
                   <DeleteIcon fontSize="small" />
@@ -227,6 +263,12 @@ export function CreateGame() {
           {loading ? <CircularProgress size={24} color="inherit" /> : "Créer la partie"}
         </Button>
       </Container>
+
+      <SaveToBankDialog
+        open={saveToBankText !== null}
+        questionText={saveToBankText ?? ""}
+        onClose={() => setSaveToBankText(null)}
+      />
     </Box>
   )
 }

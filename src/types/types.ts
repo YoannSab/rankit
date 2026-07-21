@@ -36,7 +36,7 @@ export interface Game {
     judgeRankings: Record<Question["id"], Ranking> | null
 }
 
-export type JudgingSubPhase = "ranking" | "revealed"
+export type JudgingSubPhase = "ranking" | "revealed" | "comparison"
 
 export interface GameState {
     phase: GamePhase

@@ -4,6 +4,7 @@ import { alpha, keyframes } from "@mui/material/styles"
 import { motion, AnimatePresence } from "framer-motion"
 import ReplayIcon from "@mui/icons-material/Replay"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
+import VisibilityIcon from "@mui/icons-material/Visibility"
 import LockIcon from "@mui/icons-material/Lock"
 import { useRankIt } from "../../hooks/useRankIt"
 import {
@@ -15,6 +16,7 @@ import {
 import { useRealtimeValue } from "../../hooks/useRealtimeValue"
 import { ReorderAvatarGrid } from "../ReorderAvatarGrid"
 import { AvatarRankTile } from "../AvatarRankTile"
+import { QuestionComparison } from "../QuestionComparison"
 import { useAvatarViewer } from "../AvatarViewer"
 import type { Player, Ranking } from "../../types/types"
 
@@ -126,6 +128,10 @@ export function JudgingPhase() {
     await setJudgingSubPhase(gameCode, "ranking", attempt + 1)
   }
 
+  const handleShowComparison = async () => {
+    await setJudgingSubPhase(gameCode, "comparison", attempt)
+  }
+
   const handleNextQuestion = async () => {
     await nextJudgingQuestion(gameCode)
   }
@@ -136,6 +142,85 @@ export function JudgingPhase() {
   const hasErrors = correctCount < localOrder.length
   const allRevealed = revealedItems.size >= localOrder.length
   const scorePercent = localOrder.length > 0 ? Math.round((correctCount / localOrder.length) * 100) : 0
+
+  // ── Render: Comparison (solution reveal for this question) ─────────────────
+
+  if (subPhase === "comparison") {
+    const judgeRank = game.judgeRankings?.[currentQuestion.id]
+    return (
+      <Box>
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+          <Box sx={{ textAlign: "center", mb: 3 }}>
+            <Chip
+              label={`Question ${currentQuestionIndex + 1}/${game.questions.length}`}
+              color="primary"
+              size="small"
+              sx={{ mb: 1, fontWeight: 600 }}
+            />
+            <Typography variant="h5" sx={{ fontWeight: 800, mt: 1 }}>
+              Le vrai classement
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              {currentQuestion.text}
+            </Typography>
+          </Box>
+        </motion.div>
+
+        {groundTruth && judgeRank ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 200, damping: 22 }}
+          >
+            <QuestionComparison
+              question={currentQuestion}
+              players={playersToRank}
+              truth={groundTruth}
+              judgeRank={judgeRank}
+              showQuestionText={false}
+            />
+          </motion.div>
+        ) : (
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center" }}>
+            Résultat indisponible.
+          </Typography>
+        )}
+
+        {isMaster && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+          >
+            <Button
+              variant="contained"
+              size="large"
+              fullWidth
+              endIcon={<ArrowForwardIcon />}
+              onClick={handleNextQuestion}
+              sx={(theme) => ({
+                mt: 4,
+                textTransform: "none",
+                fontWeight: 700,
+                py: 1.8,
+                borderRadius: 2.5,
+                fontSize: "1rem",
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+                "&:hover": {
+                  boxShadow: `0 6px 28px ${alpha(theme.palette.primary.main, 0.4)}`,
+                },
+              })}
+            >
+              {currentQuestionIndex < game.questions.length - 1
+                ? "Question suivante"
+                : "Résultats finaux 🏆"}
+            </Button>
+          </motion.div>
+        )}
+      </Box>
+    )
+  }
 
   // ── Render: Revealed phase ─────────────────────────────────────────────────
 
@@ -294,8 +379,8 @@ export function JudgingPhase() {
                 variant="contained"
                 size="large"
                 fullWidth
-                endIcon={<ArrowForwardIcon />}
-                onClick={handleNextQuestion}
+                endIcon={hasErrors ? <VisibilityIcon /> : <ArrowForwardIcon />}
+                onClick={hasErrors ? handleShowComparison : handleNextQuestion}
                 sx={(theme) => ({
                   textTransform: "none",
                   fontWeight: 700,
@@ -309,9 +394,11 @@ export function JudgingPhase() {
                   },
                 })}
               >
-                {currentQuestionIndex < game.questions.length - 1
-                  ? `Question suivante`
-                  : "Résultats finaux 🏆"}
+                {hasErrors
+                  ? "Voir le résultat"
+                  : currentQuestionIndex < game.questions.length - 1
+                    ? "Passer à la question suivante"
+                    : "Résultats finaux 🏆"}
               </Button>
             </Stack>
           </motion.div>

@@ -6,19 +6,26 @@ import GavelIcon from "@mui/icons-material/Gavel"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import StarIcon from "@mui/icons-material/Star"
 import { useRankIt } from "../../hooks/useRankIt"
-import { advancePhase } from "../../services/game.service"
+import { advancePhase, updatePlayerRole } from "../../services/game.service"
 import { PlayerAvatar } from "../PlayerAvatar"
-import type { Player } from "../../types/types"
+import type { Player, Role } from "../../types/types"
 
 export function WaitingPhase() {
-  const { game, gameCode, isMaster } = useRankIt()
-  if (!game || !gameCode) return null
+  const { game, gameCode, player, setPlayer } = useRankIt()
+  if (!game || !gameCode || !player) return null
 
+  const isMaster = game.masterId === player.id
   const players = game.players.filter((p) => p.role === "player")
   const judges = game.players.filter((p) => p.role === "judge")
 
   const handleStart = () => {
     advancePhase(gameCode, "voting")
+  }
+
+  const handleChangeRole = async (role: Role) => {
+    if (role === player.role) return
+    await updatePlayerRole(gameCode, player.id, role)
+    setPlayer({ ...player, role })
   }
 
   return (
@@ -57,6 +64,25 @@ export function WaitingPhase() {
       )}
 
       <Box sx={{ textAlign: "center", mt: 5 }}>
+        <Stack sx={{ alignItems: "center", gap: 1, mb: 4 }}>
+          <Typography variant="body2" color="text.secondary">
+            Votre rôle
+          </Typography>
+          <Stack direction="row" sx={{ gap: 1 }}>
+            {(["player", "judge"] as const).map((r) => (
+              <Button
+                key={r}
+                variant={player.role === r ? "contained" : "outlined"}
+                onClick={() => handleChangeRole(r)}
+                startIcon={r === "player" ? <PersonIcon /> : <GavelIcon />}
+                sx={{ textTransform: "none", fontWeight: 600, minWidth: 120 }}
+              >
+                {r === "player" ? "Joueur" : "Juge"}
+              </Button>
+            ))}
+          </Stack>
+        </Stack>
+
         {isMaster ? (
           <Button
             variant="contained"

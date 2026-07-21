@@ -1,6 +1,6 @@
 import { ref, set, get, update, runTransaction } from "firebase/database"
 import { db } from "../config/firebase"
-import type { Game, GameState, JudgingSubPhase, Player, Question, Ranking } from "../types/types"
+import type { Game, GameState, JudgingSubPhase, Player, Question, Ranking, Role } from "../types/types"
 
 function requireDb() {
   if (!db) throw new Error("Firebase not configured. Edit src/config/firebase.ts.")
@@ -64,6 +64,57 @@ export async function joinGame(code: string, player: Player): Promise<Game> {
 
   return snapshot.val() as Game
 }
+
+// ── Player updates (waiting phase) ────────────────────────────────────────────
+
+/**
+ * Change a player's role. Only allowed while the game is still in the
+ * "waiting" phase. Uses a transaction to safely update the players array.
+ */
+export async function updatePlayerRole(
+  code: string,
+  playerId: string,
+  role: Role,
+): Promise<void> {
+  const database = requireDb()
+  const gameRef = ref(database, gamePath(code))
+
+  await runTransaction(gameRef, (current) => {
+    if (!current) return current // game doesn't exist, abort
+    if (current.state?.phase !== "waiting") return undefined // abort: too late
+    const players: Player[] = current.players ?? []
+    const idx = players.findIndex((p: Player) => p.id === playerId)
+    if (idx === -1) return undefined // player not found, abort
+    const updated = players.map((p: Player) =>
+      p.id === playerId ? { ...p, role } : p,
+    )
+    return { ...current, players: updated }
+  })
+}
+
+/**
+ * Remove a player from the game. Only allowed while the game is still in the
+ * "waiting" phase. If the leaving player is the master, the master role is
+ * transferred to the next remaining player; if no player remains, the game
+ * is deleted.
+ */
+export async function leaveGame(code: string, playerId: string): Promise<void> {
+  const database = requireDb()
+  const gameRef = ref(database, gamePath(code))
+
+  await runTransaction(gameRef, (current) => {
+    if (!current) return current // game doesn't exist, abort
+    if (current.state?.phase !== "waiting") return undefined // abort: too late
+    const players: Player[] = current.players ?? []
+    const remaining = players.filter((p: Player) => p.id !== playerId)
+    if (remaining.length === players.length) return current // not in game
+    if (remaining.length === 0) return null // last player leaves → delete game
+    const masterId =
+      current.masterId === playerId ? remaining[0].id : current.masterId
+    return { ...current, players: remaining, masterId }
+  })
+}
+
 
 // ── State machine (master only) ───────────────────────────────────────────────
 

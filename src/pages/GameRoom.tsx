@@ -1,8 +1,10 @@
 import { useEffect } from "react"
-import { useParams } from "react-router-dom"
-import { Box, Chip, CircularProgress, Container, Stack, Typography } from "@mui/material"
+import { useNavigate, useParams } from "react-router-dom"
+import { Box, Button, Chip, CircularProgress, Container, Stack, Typography } from "@mui/material"
 import { alpha } from "@mui/material/styles"
+import LogoutIcon from "@mui/icons-material/Logout"
 import { useRankIt } from "../hooks/useRankIt"
+import { leaveGame } from "../services/game.service"
 import { WaitingPhase } from "../components/phases/WaitingPhase"
 import { VotingPhase } from "../components/phases/VotingPhase"
 import { JudgingPhase } from "../components/phases/JudgingPhase"
@@ -10,7 +12,8 @@ import { ResultsPhase } from "../components/phases/ResultsPhase"
 
 export function GameRoom() {
   const { code } = useParams<{ code: string }>()
-  const { game, player, isMaster, gameCode, setGameCode, restorePlayer } = useRankIt()
+  const navigate = useNavigate()
+  const { game, player, isMaster, gameCode, setGameCode, setPlayer, restorePlayer } = useRankIt()
 
   // Sync gameCode from URL param
   useEffect(() => {
@@ -33,6 +36,13 @@ export function GameRoom() {
   }
 
   const phase = game.state.phase
+
+  const handleLeave = async () => {
+    await leaveGame(code, player.id)
+    setPlayer(null)
+    setGameCode(null)
+    navigate("/")
+  }
 
   return (
     <Box
@@ -74,6 +84,17 @@ export function GameRoom() {
           </Typography>
           {isMaster && (
             <Chip label="Maître" size="small" color="primary" />
+          )}
+          {phase === "waiting" && (
+            <Button
+              size="small"
+              color="error"
+              startIcon={<LogoutIcon />}
+              onClick={handleLeave}
+              sx={{ textTransform: "none", fontWeight: 600 }}
+            >
+              Quitter
+            </Button>
           )}
         </Stack>
       </Box>
